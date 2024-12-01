@@ -1,0 +1,82 @@
+import re
+import random
+
+# Function to create fill-in-the-blank questions
+def create_fill_in_the_blank_questions(text):
+    sentences = text.split('. ')
+    questions = []
+
+    for sentence in sentences:
+        words = sentence.split()
+        if len(words) > 5:  # Avoid very short sentences
+            missing_word = random.choice(words)
+            question = sentence.replace(missing_word, "_____", 1)
+            questions.append((question.strip(), missing_word))
+
+    return questions
+# Function to generate distractors
+def generate_distractors(correct_answer, word_list):
+    distractors = random.sample(word_list, 3)
+    # Ensure the correct answer is not in the distractors
+    while correct_answer in distractors:
+        distractors = random.sample(word_list, 3)
+    return distractors
+# Function to create multiple-choice questions
+def create_mcq_questions(text):
+    sentences = text.split('. ')
+    word_list = list(set(re.findall(r'\b\w+\b', text)))  # List of unique words
+    mcq_questions = []
+
+    for sentence in sentences:
+        words = sentence.split()
+        if len(words) > 5:  # Avoid very short sentences
+            correct_answer = random.choice(words)
+            question = sentence.replace(correct_answer, "_____", 1)
+            distractors = generate_distractors(correct_answer, word_list)
+            options = distractors + [correct_answer]
+            random.shuffle(options)
+            mcq_questions.append((question.strip(), correct_answer, options))
+
+    return mcq_questions
+# Read the text file
+def read_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        return content
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return None
+# Generate a quiz from the text file
+def generate_quiz(file_path):
+    content = read_file(file_path)
+    if not content:
+        return
+
+    # Clean text
+    content = re.sub(r'\s+', ' ', content)
+    content = re.sub(r'[^\w\s.?!]', '', content)
+
+    # Generate questions
+    fill_in_the_blank_questions = create_fill_in_the_blank_questions(content)
+    mcq_questions = create_mcq_questions(content)
+
+    # Display quiz
+    print("Generated Quiz:\n")
+    
+    # Fill-in-the-blank questions
+    print("Fill-in-the-Blank Questions:\n")
+    for i, (question, answer) in enumerate(fill_in_the_blank_questions):
+        print(f"Q{i+1}: {question}")
+        print(f"Answer: {answer}\n")  # You can hide this line in a real quiz
+
+    # Multiple-choice questions
+    print("Multiple-Choice Questions:\n")
+    for i, (question, answer, options) in enumerate(mcq_questions):
+        print(f"Q{i+1}: {question}")
+        for j, option in enumerate(options):
+            print(f"  {chr(65+j)}. {option}")
+        print(f"Answer: {answer}\n")  # You can hide this line in a real quiz
+# Replace 'input.txt' with your file path
+file_path = "/content/pollution.txt"
+generate_quiz(file_path)
