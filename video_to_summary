@@ -1,0 +1,90 @@
+!pip install nltk
+!pip install yt-dlp
+import yt_dlp
+!pip install openai-whisper
+import whisper
+from transformers import pipeline, AutoTokenizer
+import os
+import nltk
+nltk.download('punkt')
+nltk.download('punkt_tab')
+# Step 1: Download Audio from YouTube
+def download_audio(youtube_url, output_path="audio.mp3"):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'extractaudio': True,  # Extract only audio
+        'outtmpl': output_path,  # Path to save the audio
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([youtube_url])
+        print(f"Audio downloaded successfully to {output_path}")
+    except Exception as e:
+        print(f"Failed to download audio: {e}")
+        raise e
+# Step 2: Transcribe Audio to Text using Whisper model
+def transcribe_audio(audio_path):
+    print("Loading Whisper model...")
+    model = whisper.load_model("base")
+    print("Transcribing audio...")
+    result = model.transcribe(audio_path)
+    transcription = result["text"]
+    print("Transcription completed!")
+    return transcription
+# Step 3: Summarize Text using Hugging Face summarization pipeline
+def summarize_text(text, max_chunk_length=1000):
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+    sentences = nltk.sent_tokenize(text)
+    chunks = []
+    current_chunk = ""
+
+    for sentence in sentences:
+        if len(current_chunk) + len(sentence) <= max_chunk_length:
+            current_chunk += " " + sentence
+        else:
+            chunks.append(current_chunk.strip())
+            current_chunk = sentence
+
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
+    print(f"Text split into {len(chunks)} chunks for summarization.")
+    summaries = []
+    for i, chunk in enumerate(chunks):
+        print(f"Summarizing chunk {i + 1}/{len(chunks)}...")
+        summary = summarizer(chunk, max_length=200, min_length=50, do_sample=False)[0]['summary_text']
+        summaries.append(summary)
+
+    final_summary = " ".join(summaries)
+    return final_summary
+# Main function to execute all steps
+def summarize_youtube_video(youtube_url):
+    try:
+        # Download audio
+        audio_path = "audio.mp3"  # Default output path for audio
+        download_audio(youtube_url, audio_path)
+
+        # Transcribe the audio
+        transcription = transcribe_audio(audio_path)
+
+        #Just checking
+        print(f"Transcription Length: {len(transcription.split())} words")
+
+        # Summarize the transcription
+        summary = summarize_text(transcription)
+
+        # Clean up the downloaded audio file
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+
+        return summary
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+if __name__ == "__main__":
+    youtube_url = input("Enter the YouTube video URL: ")
+    summary = summarize_youtube_video(youtube_url)
+    if summary:
+        print("\n### Summary ###")
+        print(summary)
