@@ -9,17 +9,18 @@
 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-blue-100 min-h-screen">
+<body id="body" class="bg-blue-100 min-h-screen">
 
     <!-- Navbar Section -->
     <nav id="navbar" class="bg-blue-900  border-gray-700">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-2">
             <!-- Logo Section -->
+          
             <a href="#" class="flex items-center space-x-3">
                 <img src="owlno1.png" class="h-8" alt="Quizify Logo" />
                 <span class="text-2xl font-semibold text-white">Quizify</span>
             </a>
-
+        
             <!-- Right-side Buttons -->
             <div class="flex items-center space-x-3 order-2">
                 <button id="theme-toggle" class="text-gray-600 px-3 py-1 rounded-lg focus:ring-2 focus:ring-gray-200 bg-gray-200">
@@ -45,7 +46,16 @@
             </div>
         </div>
     </nav>
-
+     <!-- Content Section -->
+<div id="content" class="p-4  text-black">
+    <blockquote class="text-2xl font-semibold italic text-center text-slate-900">
+        Switch between light and dark modes using the  
+        <span class="relative">
+          <span class="block absolute -inset-1 -skew-y-3 bg-pink-500" aria-hidden="true"></span>
+          <span class="relative text-white">Toggle Button!</span>
+        </span>
+      </blockquote>
+</div>
     <!-- Input and Summary Section -->
     <div class="flex justify-center px-4 pt-6">
         <div class="w-full max-w-lg  p-6 rounded shadow-md bg-blue-200 border-blue-900 border-2">
@@ -91,6 +101,48 @@
     </div>
 
     <script>
+         const themeToggle = document.getElementById('theme-toggle');
+    const navbar = document.getElementById('navbar');
+    const content = document.getElementById('content');
+    const navLinks = document.getElementById('nav-links');
+    const brand = document.getElementById('brand');
+    const body   = document.getElementById('body');
+             // Default state is light mode
+    let darkMode = false;
+
+themeToggle.addEventListener('click', () => {
+    darkMode = !darkMode; // Toggle the darkMode state
+    if (darkMode) {
+        // Enable dark mode
+        navbar.classList.replace('bg-blue-900', 'bg-gray-900');
+        content.classList.replace('bg-white', 'bg-gray-900');
+        content.classList.replace('text-black', 'text-white');
+        body.classList.replace('bg-blue-100', 'bg-blue-900');
+        themeToggle.textContent = 'Light';
+
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.classList.replace('text-gray-300', 'text-gray-400');
+            link.classList.replace('text-white', 'text-gray-400');
+            
+        });
+        brand.classList.replace('text-white', 'text-gray-400');
+        themeToggle.textContent = 'Light'; // Update button text
+    } else {
+        // Enable light mode
+        navbar.classList.replace('bg-gray-900', 'bg-blue-900');
+        content.classList.replace('bg-gray-900', 'bg-white');
+        content.classList.replace('text-white', 'text-black');
+        body.classList.replace( 'bg-blue-900', 'bg-blue-100');
+        themeToggle.textContent = 'Dark';
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.classList.replace('text-gray-400', 'text-gray-300');
+            link.classList.replace('text-gray-400', 'text-white');
+        });
+        brand.classList.replace('text-gray-400', 'text-white');
+        themeToggle.textContent = 'Dark'; // Update button text
+    }
+});
+
         const inputText = document.getElementById('inputText');
         const videoPlayer = document.getElementById('videoPlayer');
         const summarizeButton = document.getElementById('summarizeButton');
